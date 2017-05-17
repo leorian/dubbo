@@ -490,7 +490,6 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     }
                 } else {
                     Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
-
                     Exporter<?> exporter = protocol.export(invoker);
                     exporters.add(exporter);
                 }
