@@ -6,24 +6,77 @@ import com.alibaba.dubbo.common.URL;
 
 public interface ZookeeperClient {
 
-	void create(String path, boolean ephemeral);
+    /**
+     * 创建路径 持久化或者临时
+     *
+     * @param path
+     * @param ephemeral
+     */
+    void create(String path, boolean ephemeral);
 
-	void delete(String path);
+    /**
+     * 删除路径
+     *
+     * @param path
+     */
+    void delete(String path);
 
-	List<String> getChildren(String path);
+    /**
+     * 获取某个路径子节点（路径）集合
+     *
+     * @param path
+     * @return
+     */
+    List<String> getChildren(String path);
 
-	List<String> addChildListener(String path, ChildListener listener);
+    /**
+     * 添加路径监听器
+     *
+     * @param path
+     * @param listener
+     * @return
+     */
+    List<String> addChildListener(String path, ChildListener listener);
 
-	void removeChildListener(String path, ChildListener listener);
+    /**
+     * 删除路径监听器
+     *
+     * @param path
+     * @param listener
+     */
+    void removeChildListener(String path, ChildListener listener);
 
-	void addStateListener(StateListener listener);
-	
-	void removeStateListener(StateListener listener);
+    /**
+     * 添加状态监听器
+     *
+     * @param listener
+     */
+    void addStateListener(StateListener listener);
 
-	boolean isConnected();
+    /**
+     * 删除状态监听器
+     *
+     * @param listener
+     */
+    void removeStateListener(StateListener listener);
 
-	void close();
+    /**
+     * 是否已连接
+     *
+     * @return
+     */
+    boolean isConnected();
 
-	URL getUrl();
+    /**
+     * 关闭连接
+     */
+    void close();
+
+    /**
+     * 获取连接地址
+     *
+     * @return
+     */
+    URL getUrl();
 
 }
