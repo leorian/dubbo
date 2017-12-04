@@ -15,9 +15,7 @@
  */
 package com.alibaba.dubbo.governance.sync;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,10 +64,30 @@ public class RegistryServerSync implements InitializingBean, DisposableBean, Not
     public ConcurrentMap<String, ConcurrentMap<String, Map<Long, URL>>> getRegistryCache(){
         return registryCache;
     }
+
+    private void timeTask() {
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                registryService.unsubscribe(SUBSCRIBE, RegistryServerSync.this);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                registryService.subscribe(SUBSCRIBE, RegistryServerSync.this);
+                System.out.println("定时任务正在运行...");
+            }
+        };
+
+        timer.schedule(timerTask, 3 * 60 * 1000, 3 * 60 * 1000);
+    }
     
     public void afterPropertiesSet() throws Exception {
         logger.info("Init Dubbo Admin Sync Cache...");
         registryService.subscribe(SUBSCRIBE, this);
+        timeTask();
     }
 
     public void destroy() throws Exception {
