@@ -311,4 +311,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
         return address;
     }
 
+    public static void main(String args[]) {
+        System.out.println(appendDefaultPort("172.16.150.151"));
+        System.out.println(appendDefaultPort("172.16.150.151:0"));
+        System.out.println(appendDefaultPort("172.16.150.151:2180"));
+    }
+
 }
