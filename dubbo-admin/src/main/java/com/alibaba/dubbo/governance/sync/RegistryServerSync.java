@@ -20,6 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.alibaba.dubbo.common.extension.ExtensionLoader;
+import com.alibaba.dubbo.registry.Registry;
+import com.alibaba.dubbo.registry.RegistryFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.governance.web.common.pulltool.Tool;
 import com.alibaba.dubbo.registry.NotifyListener;
 import com.alibaba.dubbo.registry.RegistryService;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 /**
  * @author ding.lid
@@ -55,43 +59,30 @@ public class RegistryServerSync implements InitializingBean, DisposableBean, Not
 
     private static final AtomicLong ID = new AtomicLong();
 
-    @Autowired
-    private RegistryService registryService;
+    private String dubboRegistryAddress;
 
-    // ConcurrentMap<category, ConcurrentMap<servicename, Map<Long, URL>>>
+    public void setDubboRegistryAddress(String dubboRegistryAddress) {
+        this.dubboRegistryAddress = dubboRegistryAddress;
+    }
+
+    private Registry registry;
+
     private final ConcurrentMap<String, ConcurrentMap<String, Map<Long, URL>>> registryCache = new ConcurrentHashMap<String, ConcurrentMap<String, Map<Long, URL>>>();
 
     public ConcurrentMap<String, ConcurrentMap<String, Map<Long, URL>>> getRegistryCache(){
         return registryCache;
     }
-
-    private void timeTask() {
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                registryService.unsubscribe(SUBSCRIBE, RegistryServerSync.this);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                registryService.subscribe(SUBSCRIBE, RegistryServerSync.this);
-                System.out.println("定时任务正在运行...");
-            }
-        };
-
-        timer.schedule(timerTask, 3 * 60 * 1000, 3 * 60 * 1000);
-    }
     
     public void afterPropertiesSet() throws Exception {
         logger.info("Init Dubbo Admin Sync Cache...");
-        registryService.subscribe(SUBSCRIBE, this);
-        timeTask();
+        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension("zookeeper");
+        URL url = URL.valueOf(dubboRegistryAddress);
+        registry = registryFactory.getRegistry(url);
+        registry.subscribe(SUBSCRIBE, this);
     }
 
     public void destroy() throws Exception {
-        registryService.unsubscribe(SUBSCRIBE, this);
+        registry.unsubscribe(SUBSCRIBE, this);
     }
     
     // 收到的通知对于 ，同一种类型数据（override、subcribe、route、其它是Provider），同一个服务的数据是全量的
