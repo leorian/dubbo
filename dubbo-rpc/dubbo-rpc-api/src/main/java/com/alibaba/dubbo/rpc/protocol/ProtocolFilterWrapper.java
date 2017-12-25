@@ -30,14 +30,15 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * ListenerProtocol
- * 
+ * 构造过滤器链
+ *
  * @author william.liangf
  */
 public class ProtocolFilterWrapper implements Protocol {
 
     private final Protocol protocol;
 
-    public ProtocolFilterWrapper(Protocol protocol){
+    public ProtocolFilterWrapper(Protocol protocol) {
         if (protocol == null) {
             throw new IllegalArgumentException("protocol == null");
         }
@@ -68,9 +69,10 @@ public class ProtocolFilterWrapper implements Protocol {
 
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
-        List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
+        List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).
+                getActivateExtension(invoker.getUrl(), key, group);
         if (filters.size() > 0) {
-            for (int i = filters.size() - 1; i >= 0; i --) {
+            for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
@@ -104,5 +106,5 @@ public class ProtocolFilterWrapper implements Protocol {
         }
         return last;
     }
-    
+
 }

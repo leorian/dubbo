@@ -47,7 +47,13 @@ import com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory;
  * @author william.liangf
  * @export
  */
-public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener, BeanNameAware {
+public class ServiceBean<T>
+        extends ServiceConfig<T>
+        implements InitializingBean,
+        DisposableBean,
+        ApplicationContextAware,
+        ApplicationListener,
+        BeanNameAware {
 
     private static final long serialVersionUID = 213195494150089726L;
 
