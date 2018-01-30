@@ -58,7 +58,8 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     }
     
     public DubboInvoker(Class<T> serviceType, URL url, ExchangeClient[] clients, Set<Invoker<?>> invokers){
-        super(serviceType, url, new String[] {Constants.INTERFACE_KEY, Constants.GROUP_KEY, Constants.TOKEN_KEY, Constants.TIMEOUT_KEY});
+        super(serviceType, url, new String[] {Constants.INTERFACE_KEY, Constants.GROUP_KEY, Constants.TOKEN_KEY,
+                Constants.TIMEOUT_KEY});
         this.clients = clients;
         // get version.
         this.version = url.getParameter(Constants.VERSION_KEY, "0.0.0");
@@ -82,23 +83,25 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
             boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY,Constants.DEFAULT_TIMEOUT);
-            if (isOneway) {
+            if (isOneway) {//单向传输
             	boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
                 RpcContext.getContext().setFuture(null);
                 return new RpcResult();
-            } else if (isAsync) {
+            } else if (isAsync) {//异步传输
             	ResponseFuture future = currentClient.request(inv, timeout) ;
                 RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
                 return new RpcResult();
-            } else {
+            } else {//同步传输
             	RpcContext.getContext().setFuture(null);
                 return (Result) currentClient.request(inv, timeout).get();
             }
         } catch (TimeoutException e) {
-            throw new RpcException(RpcException.TIMEOUT_EXCEPTION, "Invoke remote method timeout. method: " + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException(RpcException.TIMEOUT_EXCEPTION, "Invoke remote method timeout. method: "
+                    + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
         } catch (RemotingException e) {
-            throw new RpcException(RpcException.NETWORK_EXCEPTION, "Failed to invoke remote method: " + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
+            throw new RpcException(RpcException.NETWORK_EXCEPTION, "Failed to invoke remote method: "
+                    + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
     
