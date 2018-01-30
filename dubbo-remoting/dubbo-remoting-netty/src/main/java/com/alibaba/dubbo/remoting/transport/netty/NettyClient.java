@@ -75,9 +75,9 @@ public class NettyClient extends AbstractClient {
             public ChannelPipeline getPipeline() {
                 NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
                 ChannelPipeline pipeline = Channels.pipeline();
-                pipeline.addLast("decoder", adapter.getDecoder());
-                pipeline.addLast("encoder", adapter.getEncoder());
-                pipeline.addLast("handler", nettyHandler);
+                pipeline.addLast("decoder", adapter.getDecoder());//解码
+                pipeline.addLast("encoder", adapter.getEncoder());//编码
+                pipeline.addLast("handler", nettyHandler);//处理器
                 return pipeline;
             }
         });

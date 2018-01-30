@@ -84,9 +84,9 @@ public class NettyServer extends AbstractServer implements Server {
                 if (idleTimeout > 10000) {
                     pipeline.addLast("timer", new IdleStateHandler(timer, idleTimeout / 1000, 0, 0));
                 }*/
-                pipeline.addLast("decoder", adapter.getDecoder());
-                pipeline.addLast("encoder", adapter.getEncoder());
-                pipeline.addLast("handler", nettyHandler);
+                pipeline.addLast("decoder", adapter.getDecoder());//解码
+                pipeline.addLast("encoder", adapter.getEncoder());//编码
+                pipeline.addLast("handler", nettyHandler);//处理器
                 return pipeline;
             }
         });

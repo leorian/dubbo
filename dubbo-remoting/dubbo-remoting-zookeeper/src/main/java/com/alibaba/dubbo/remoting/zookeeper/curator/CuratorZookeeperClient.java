@@ -38,16 +38,16 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             client = builder.build();
             client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
                 public void stateChanged(CuratorFramework client, ConnectionState state) {
-                    if (state == ConnectionState.LOST) {
+                    if (state == ConnectionState.LOST) {//失去连接
                         CuratorZookeeperClient.this.stateChanged(StateListener.DISCONNECTED);
-                    } else if (state == ConnectionState.CONNECTED) {
+                    } else if (state == ConnectionState.CONNECTED) {//连接上
                         CuratorZookeeperClient.this.stateChanged(StateListener.CONNECTED);
-                    } else if (state == ConnectionState.RECONNECTED) {
+                    } else if (state == ConnectionState.RECONNECTED) {//重新连接上
                         CuratorZookeeperClient.this.stateChanged(StateListener.RECONNECTED);
                     }
                 }
             });
-            client.start();
+            client.start();//启动
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -142,6 +142,13 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         return new CuratorWatcherImpl(listener);
     }
 
+    /**
+     * 订阅
+     *
+     * @param path
+     * @param listener
+     * @return
+     */
     public List<String> addTargetChildListener(String path, CuratorWatcher listener) {
         try {
             return client.getChildren().usingWatcher(listener).forPath(path);
@@ -152,6 +159,12 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    /**
+     * 取消订阅
+     *
+     * @param path
+     * @param listener
+     */
     public void removeTargetChildListener(String path, CuratorWatcher listener) {
         ((CuratorWatcherImpl) listener).unwatch();
     }
