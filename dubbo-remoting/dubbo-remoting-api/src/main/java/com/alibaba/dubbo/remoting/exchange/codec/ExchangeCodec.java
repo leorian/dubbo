@@ -210,21 +210,29 @@ public class ExchangeCodec extends TelnetCodec {
     }
 
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
+
+        //获取序列化方式
         Serialization serialization = getSerialization(channel);
+        //消息头部信息16字节长度
         // header.
         byte[] header = new byte[HEADER_LENGTH];
+        //2个字节的魔方值
         // set magic number.
         Bytes.short2bytes(MAGIC, header);
-
+        //序列化标志位
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | serialization.getContentTypeId());
 
+        //通信方式：双向还是单向
         if (req.isTwoWay()) header[2] |= FLAG_TWOWAY;
+        //事件
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
+        //4个字节的id主键，唯一代表一个消息
         // set request id.
         Bytes.long2bytes(req.getId(), header, 4);
 
+        //消息体
         // encode request data.
         int savedWriteIndex = buffer.writerIndex();
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
@@ -239,12 +247,17 @@ public class ExchangeCodec extends TelnetCodec {
         bos.flush();
         bos.close();
         int len = bos.writtenBytes();
+        //检测长度是否超过限制
         checkPayload(channel, len);
+        //消息体长度4个字节
         Bytes.int2bytes(len, header, 12);
 
         // write
+        //移动写入位置到消息头开端
         buffer.writerIndex(savedWriteIndex);
+        //写入头部信息
         buffer.writeBytes(header); // write header.
+        //移动写入位置到消息体末端
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
     }
 
