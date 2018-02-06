@@ -250,25 +250,35 @@ public class ExchangeCodec extends TelnetCodec {
 
     protected void encodeResponse(Channel channel, ChannelBuffer buffer, Response res) throws IOException {
         try {
+            //序列化方式
+            //也是根据SPI扩展来获取，url中没指定的话默认使用hessian2
             Serialization serialization = getSerialization(channel);
             // header.
+            //长度为16字节的数组，协议头
             byte[] header = new byte[HEADER_LENGTH];
             // set magic number.
+            //魔数0xdabb
             Bytes.short2bytes(MAGIC, header);
             // set request and serialization flag.
+            //序列化方式
             header[2] = serialization.getContentTypeId();
             if (res.isHeartbeat()) header[2] |= FLAG_EVENT;
             // set response status.
+            //响应状态
             byte status = res.getStatus();
             header[3] = status;
             // set request id.
+            //设置请求id
             Bytes.long2bytes(res.getId(), header, 4);
-
+//buffer为1024字节的ChannelBuffer
+            //获取buffer的写入位置
             int savedWriteIndex = buffer.writerIndex();
+            //需要再加上协议头的长度之后，才是正确的写入位置
             buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
             ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);
             ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
             // encode response data or error message.
+            // 对响应信息或者错误消息进行编码
             if (status == Response.OK) {
                 if (res.isHeartbeat()) {
                     encodeHeartbeatData(channel, out, res.getResult());
@@ -276,17 +286,22 @@ public class ExchangeCodec extends TelnetCodec {
                     encodeResponseData(channel, out, res.getResult());
                 }
             }
+            //错误消息
             else out.writeUTF(res.getErrorMessage());
             out.flushBuffer();
             bos.flush();
             bos.close();
-
+            //写出去的消息的长度
             int len = bos.writtenBytes();
+            //查看消息长度是否过长
             checkPayload(channel, len);
             Bytes.int2bytes(len, header, 12);
             // write
+            //重置写入的位置
             buffer.writerIndex(savedWriteIndex);
+            //向buffer中写入消息头
             buffer.writeBytes(header); // write header.
+            //buffer写出去的位置从writerIndex开始，加上header长度，加上数据长度
             buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
         } catch (Throwable t) {
             // 发送失败信息给Consumer，否则Consumer只能等超时了
