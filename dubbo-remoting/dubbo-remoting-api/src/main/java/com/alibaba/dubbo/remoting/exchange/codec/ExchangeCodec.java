@@ -51,6 +51,14 @@ public class ExchangeCodec extends TelnetCodec {
     protected static final int HEADER_LENGTH = 16;
 
     // magic header.
+    //8421
+    //10 a
+    //11 b
+    //12 c
+    //13 d
+    //14 e
+    //15 f
+    //1101 1010 1011 1011
     protected static final short MAGIC = (short) 0xdabb;
 
     protected static final byte MAGIC_HIGH = Bytes.short2bytes(MAGIC)[0];
@@ -58,12 +66,14 @@ public class ExchangeCodec extends TelnetCodec {
     protected static final byte MAGIC_LOW = Bytes.short2bytes(MAGIC)[1];
 
     // message flag.
+    //8421 8421
+    //1000 0000
     protected static final byte FLAG_REQUEST = (byte) 0x80;
-
+    //0100 0000
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
-
+    //0010 0000
     protected static final byte FLAG_EVENT = (byte) 0x20;
-
+    //0001 1111
     protected static final int SERIALIZATION_MASK = 0x1f;
 
     public Short getMagicCode() {
