@@ -102,13 +102,13 @@ public class ExchangeCodec extends TelnetCodec {
         if (readable > 0 && header[0] != MAGIC_HIGH
                 || readable > 1 && header[1] != MAGIC_LOW) {
             int length = header.length;
-            if (header.length < readable) {
-                header = Bytes.copyOf(header, readable);
-                buffer.readBytes(header, length, readable - length);
+            if (header.length < readable) {//头长度 小于 可读长度
+                header = Bytes.copyOf(header, readable);//延长头长度
+                buffer.readBytes(header, length, readable - length);//读取头数据
             }
             for (int i = 1; i < header.length - 1; i++) {
                 if (header[i] == MAGIC_HIGH && header[i + 1] == MAGIC_LOW) {
-                    buffer.readerIndex(buffer.readerIndex() - header.length + i);
+                    buffer.readerIndex(buffer.readerIndex() - header.length + i);//重新定位
                     header = Bytes.copyOf(header, i);
                     break;
                 }
