@@ -233,6 +233,10 @@ public class PojoUtils {
         }
     }
 
+    public static void main(String args[]) {
+        System.out.println(Collection.class.isAssignableFrom(ArrayList.class));
+    }
+
     @SuppressWarnings("unchecked")
     private static Collection<Object> createCollection(Class<?> type, int len) {
         if (type.isAssignableFrom(ArrayList.class)) {
