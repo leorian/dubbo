@@ -34,10 +34,12 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
 
     private int markedWriterIndex;
 
+    //读的起始位置
     public int readerIndex() {
         return readerIndex;
     }
 
+    //设置读的起始位置
     public void readerIndex(int readerIndex) {
         if (readerIndex < 0 || readerIndex > writerIndex) {
             throw new IndexOutOfBoundsException();
@@ -45,10 +47,12 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.readerIndex = readerIndex;
     }
 
+    //写的起始位置
     public int writerIndex() {
         return writerIndex;
     }
 
+    //设置写的起始位置
     public void writerIndex(int writerIndex) {
         if (writerIndex < readerIndex || writerIndex > capacity()) {
             throw new IndexOutOfBoundsException();
@@ -56,6 +60,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.writerIndex = writerIndex;
     }
 
+    //设置读的起始位置和写的起始位置
     public void setIndex(int readerIndex, int writerIndex) {
         if (readerIndex < 0 || readerIndex > writerIndex || writerIndex > capacity()) {
             throw new IndexOutOfBoundsException();
@@ -64,63 +69,79 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.writerIndex = writerIndex;
     }
 
+    /**
+     * 重置读的起始位置和写的起始位置
+     */
     public void clear() {
         readerIndex = writerIndex = 0;
     }
 
+    //是否可读
     public boolean readable() {
         return readableBytes() > 0;
     }
 
+    //是否可写
     public boolean writable() {
         return writableBytes() > 0;
     }
 
+    //可读字节数
     public int readableBytes() {
         return writerIndex - readerIndex;
     }
 
+    //可写字节数
     public int writableBytes() {
         return capacity() - writerIndex;
     }
 
+    //标记可读位置
     public void markReaderIndex() {
         markedReaderIndex = readerIndex;
     }
 
+    //重置可读位置到标记处
     public void resetReaderIndex() {
         readerIndex(markedReaderIndex);
     }
 
+    //标记可写位置
     public void markWriterIndex() {
         markedWriterIndex = writerIndex;
     }
 
+    //重置可写位置到标记处
     public void resetWriterIndex() {
         writerIndex = markedWriterIndex;
     }
 
+    //丢弃已经读的字节字节
     public void discardReadBytes() {
         if (readerIndex == 0) {
             return;
         }
         setBytes(0, this, readerIndex, writerIndex - readerIndex);
-        writerIndex -= readerIndex;
+        //writerIndex -= readerIndex;
+        writerIndex = writerIndex - readerIndex;
         markedReaderIndex = Math.max(markedReaderIndex - readerIndex, 0);
         markedWriterIndex = Math.max(markedWriterIndex - readerIndex, 0);
         readerIndex = 0;
     }
 
+    //确定可写字节数
     public void ensureWritableBytes(int writableBytes) {
         if (writableBytes > writableBytes()) {
             throw new IndexOutOfBoundsException();
         }
     }
 
+    //获取字节到字节数组
     public void getBytes(int index, byte[] dst) {
         getBytes(index, dst, 0, dst.length);
     }
 
+    //获取字节到字节缓冲区
     public void getBytes(int index, ChannelBuffer dst) {
         getBytes(index, dst, dst.writableBytes());
     }
@@ -130,6 +151,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
             throw new IndexOutOfBoundsException();
         }
         getBytes(index, dst, dst.writerIndex(), length);
+        //写完之后，将可写位置延后
         dst.writerIndex(dst.writerIndex() + length);
     }
 
@@ -149,6 +171,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         src.readerIndex(src.readerIndex() + length);
     }
 
+    //读一个字节
     public byte readByte() {
         if (readerIndex == writerIndex) {
             throw new IndexOutOfBoundsException();
@@ -156,6 +179,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         return getByte(readerIndex++);
     }
 
+    //读指定长度的字节缓冲
     public ChannelBuffer readBytes(int length) {
         checkReadableBytes(length);
         if (length == 0) {
@@ -271,7 +295,7 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
     @Override
     public boolean equals(Object o) {
         return o instanceof ChannelBuffer
-            && ChannelBuffers.equals(this, (ChannelBuffer) o);
+                && ChannelBuffers.equals(this, (ChannelBuffer) o);
     }
 
     public int compareTo(ChannelBuffer that) {
@@ -281,10 +305,10 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
     @Override
     public String toString() {
         return getClass().getSimpleName() + '(' +
-            "ridx=" + readerIndex + ", " +
-            "widx=" + writerIndex + ", " +
-            "cap=" + capacity() +
-            ')';
+                "ridx=" + readerIndex + ", " +
+                "widx=" + writerIndex + ", " +
+                "cap=" + capacity() +
+                ')';
     }
 
     protected void checkReadableBytes(int minimumReadableBytes) {

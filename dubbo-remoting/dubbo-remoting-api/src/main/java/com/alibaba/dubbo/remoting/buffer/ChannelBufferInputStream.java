@@ -27,11 +27,11 @@ public class ChannelBufferInputStream extends InputStream {
     private final ChannelBuffer buffer;
     private final int startIndex;
     private final int endIndex;
-    
+
     public ChannelBufferInputStream(ChannelBuffer buffer) {
         this(buffer, buffer.readableBytes());
     }
-    
+
     public ChannelBufferInputStream(ChannelBuffer buffer, int length) {
         if (buffer == null) {
             throw new NullPointerException("buffer");
@@ -42,40 +42,78 @@ public class ChannelBufferInputStream extends InputStream {
         if (length > buffer.readableBytes()) {
             throw new IndexOutOfBoundsException();
         }
-        
+
         this.buffer = buffer;
         startIndex = buffer.readerIndex();
         endIndex = startIndex + length;
         buffer.markReaderIndex();
     }
 
+    /**
+     * 已经读了多少字节
+     *
+     * @return
+     */
     public int readBytes() {
         return buffer.readerIndex() - startIndex;
     }
 
+    /**
+     * 还有多少字节未读
+     *
+     * @return
+     * @throws IOException
+     */
     @Override
     public int available() throws IOException {
         return endIndex - buffer.readerIndex();
     }
 
+    /**
+     * 标记读的位置
+     *
+     * @param readlimit
+     */
     @Override
     public void mark(int readlimit) {
         buffer.markReaderIndex();
     }
 
+    /**
+     * 是否支持标记
+     *
+     * @return
+     */
     @Override
     public boolean markSupported() {
         return true;
     }
 
+    /**
+     * 读取1个字节
+     *
+     * @return
+     * @throws IOException
+     */
     @Override
     public int read() throws IOException {
         if (!buffer.readable()) {
             return -1;
         }
+        //1111 1111
+        //8421 8421
         return buffer.readByte() & 0xff;
     }
 
+    /**
+     * 读一个字节数组
+     *
+     * @param b
+     * @param off
+     * @param len
+     * @return
+     * @throws IOException
+     */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int available = available();
@@ -88,11 +126,23 @@ public class ChannelBufferInputStream extends InputStream {
         return len;
     }
 
+    /**
+     * 重置读节点位置
+     *
+     * @throws IOException
+     */
     @Override
     public void reset() throws IOException {
         buffer.resetReaderIndex();
     }
 
+    /**
+     * 跳过几个字节
+     *
+     * @param n
+     * @return
+     * @throws IOException
+     */
     @Override
     public long skip(long n) throws IOException {
         if (n > Integer.MAX_VALUE) {

@@ -25,20 +25,23 @@ import java.io.OutputStream;
 public class ChannelBufferOutputStream extends OutputStream {
 
     private final ChannelBuffer buffer;
-    private final int           startIndex;
+    private final int startIndex;
 
     public ChannelBufferOutputStream(ChannelBuffer buffer) {
         if (buffer == null) {
             throw new NullPointerException("buffer");
         }
         this.buffer = buffer;
+        //开始写的位置
         startIndex = buffer.writerIndex();
     }
 
+    //已经写了多少字节
     public int writtenBytes() {
         return buffer.writerIndex() - startIndex;
     }
 
+    //写一个字节数组
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if (len == 0) {
@@ -48,11 +51,24 @@ public class ChannelBufferOutputStream extends OutputStream {
         buffer.writeBytes(b, off, len);
     }
 
+    /**
+     * 写一个字节数组
+     *
+     * @param b
+     * @throws IOException
+     */
     @Override
     public void write(byte[] b) throws IOException {
         buffer.writeBytes(b);
     }
 
+
+    /**
+     * 写一个字节
+     *
+     * @param b
+     * @throws IOException
+     */
     @Override
     public void write(int b) throws IOException {
         buffer.writeByte((byte) b);
