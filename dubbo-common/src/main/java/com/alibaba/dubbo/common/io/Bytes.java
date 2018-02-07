@@ -752,7 +752,7 @@ public class Bytes {
      *
      * @param bytes source.
      * @return compressed byte array.
-//     * @throws IOException.
+     * //     * @throws IOException.
      */
     public static byte[] zip(byte[] bytes) throws IOException {
         UnsafeByteArrayOutputStream bos = new UnsafeByteArrayOutputStream();
@@ -833,6 +833,7 @@ public class Bytes {
         return getMD5(is, 1024 * 8);
     }
 
+    //一个字节8位128 64 32 16 8421
     private static byte hex(char c) {
         if (c <= '9') return (byte) (c - '0');
         if (c >= 'a' && c <= 'f') return (byte) (c - 'a' + 10);
