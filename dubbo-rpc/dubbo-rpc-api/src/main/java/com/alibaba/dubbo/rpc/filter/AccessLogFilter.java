@@ -56,42 +56,47 @@ import com.alibaba.dubbo.rpc.RpcException;
  *    &lt;appender-ref ref="foo" /&gt;
  * &lt;/logger&gt;
  * </pre></code>
- * 
+ *
  * @author ding.lid
  */
 @Activate(group = Constants.PROVIDER, value = Constants.ACCESS_LOG_KEY)
 public class AccessLogFilter implements Filter {
-    
-    private static final Logger logger            = LoggerFactory.getLogger(AccessLogFilter.class);
 
-    private static final String  ACCESS_LOG_KEY   = "dubbo.accesslog";
-    
-    private static final String  FILE_DATE_FORMAT   = "yyyyMMdd";
+    private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);
 
-    private static final String  MESSAGE_DATE_FORMAT   = "yyyy-MM-dd HH:mm:ss";
+    private static final String ACCESS_LOG_KEY = "dubbo.accesslog";
 
-    private static final int LOG_MAX_BUFFER = 5000;
+    private static final String FILE_DATE_FORMAT = "yyyyMMdd";//文件日期格式
 
-    private static final long LOG_OUTPUT_INTERVAL = 5000;
+    private static final String MESSAGE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";//消息日期时间格式
+
+    private static final int LOG_MAX_BUFFER = 5000;//日志最大缓存
+
+    private static final long LOG_OUTPUT_INTERVAL = 5000;//日志输出时间间隔
 
     private final ConcurrentMap<String, Set<String>> logQueue = new ConcurrentHashMap<String, Set<String>>();
 
-    private final ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Dubbo-Access-Log", true));
+    //定时线程池
+    private final ScheduledExecutorService logScheduled = Executors.
+            newScheduledThreadPool(2,
+                    new NamedThreadFactory("Dubbo-Access-Log", true));
 
+    //future对象
     private volatile ScheduledFuture<?> logFuture = null;
 
+    //日志任务
     private class LogTask implements Runnable {
         public void run() {
             try {
                 if (logQueue != null && logQueue.size() > 0) {
                     for (Map.Entry<String, Set<String>> entry : logQueue.entrySet()) {
                         try {
-                            String accesslog = entry.getKey();
-                            Set<String> logSet = entry.getValue();
+                            String accesslog = entry.getKey();//文件名称
+                            Set<String> logSet = entry.getValue();//文件内容
                             File file = new File(accesslog);
                             File dir = file.getParentFile();
-                            if (null!=dir&&! dir.exists()) {
-                                dir.mkdirs();
+                            if (null != dir && !dir.exists()) {
+                                dir.mkdirs();//父文件夹不存在就创建，跨级
                             }
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Append log to " + accesslog);
@@ -99,16 +104,16 @@ public class AccessLogFilter implements Filter {
                             if (file.exists()) {
                                 String now = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date());
                                 String last = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date(file.lastModified()));
-                                if (! now.equals(last)) {
+                                if (!now.equals(last)) {
                                     File archive = new File(file.getAbsolutePath() + "." + last);
-                                    file.renameTo(archive);
+                                    file.renameTo(archive);//重命名
                                 }
                             }
                             FileWriter writer = new FileWriter(file, true);
                             try {
-                                for(Iterator<String> iterator = logSet.iterator();
-                                    iterator.hasNext();
-                                    iterator.remove()) {
+                                for (Iterator<String> iterator = logSet.iterator();
+                                     iterator.hasNext();
+                                     iterator.remove()) {
                                     writer.write(iterator.next());
                                     writer.write("\r\n");
                                 }
@@ -126,17 +131,21 @@ public class AccessLogFilter implements Filter {
             }
         }
     }
-    
+
     private void init() {
         if (logFuture == null) {
             synchronized (logScheduled) {
                 if (logFuture == null) {
-                    logFuture = logScheduled.scheduleWithFixedDelay(new LogTask(), LOG_OUTPUT_INTERVAL, LOG_OUTPUT_INTERVAL, TimeUnit.MILLISECONDS);
+                    logFuture = logScheduled.
+                            scheduleWithFixedDelay(new LogTask(),
+                                    LOG_OUTPUT_INTERVAL,
+                                    LOG_OUTPUT_INTERVAL,
+                                    TimeUnit.MILLISECONDS);
                 }
             }
         }
     }
-    
+
     private void log(String accesslog, String logmessage) {
         init();
         Set<String> logSet = logQueue.get(accesslog);
@@ -154,14 +163,14 @@ public class AccessLogFilter implements Filter {
             String accesslog = invoker.getUrl().getParameter(Constants.ACCESS_LOG_KEY);
             if (ConfigUtils.isNotEmpty(accesslog)) {
                 RpcContext context = RpcContext.getContext();
-                String serviceName = invoker.getInterface().getName();
-                String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);
-                String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);
+                String serviceName = invoker.getInterface().getName();//接口类名
+                String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);//版本号
+                String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);//组
                 StringBuilder sn = new StringBuilder();
                 sn.append("[").append(new SimpleDateFormat(MESSAGE_DATE_FORMAT).format(new Date())).append("] ").
                         append(context.getRemoteHost()).append(":").append(context.getRemotePort())
-                .append(" -> ").append(context.getLocalHost()).append(":").append(context.getLocalPort())
-                .append(" - ");
+                        .append(" -> ").append(context.getLocalHost()).append(":").append(context.getLocalPort())
+                        .append(" - ");
                 if (null != group && group.length() > 0) {
                     sn.append(group).append("/");
                 }
