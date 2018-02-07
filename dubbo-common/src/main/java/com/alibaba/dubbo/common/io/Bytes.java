@@ -414,8 +414,10 @@ public class Bytes {
         char[] cs = new char[len * 2];
         for (int i = 0; i < len; i++) {
             b = bs[r++];
-            cs[w++] = BASE16[b >> 4 & MASK4];
-            cs[w++] = BASE16[b & MASK4];
+            //1个字节8位
+            // 0x0f 0000 1111
+            cs[w++] = BASE16[b >> 4 & MASK4];//高位
+            cs[w++] = BASE16[b & MASK4];//低位
         }
         return new String(cs);
     }
@@ -537,12 +539,14 @@ public class Bytes {
         char[] cs = new char[num * 4 + (rem == 0 ? 0 : pad ? 4 : rem + 1)];
 
         for (int i = 0; i < num; i++) {
+            //0xff 1111 1111
             int b1 = bs[r++] & MASK8, b2 = bs[r++] & MASK8, b3 = bs[r++] & MASK8;
 
-            cs[w++] = code[b1 >> 2];
-            cs[w++] = code[(b1 << 4) & MASK6 | (b2 >> 4)];
-            cs[w++] = code[(b2 << 2) & MASK6 | (b3 >> 6)];
-            cs[w++] = code[b3 & MASK6];
+            //0x3f 0011 1111
+            cs[w++] = code[b1 >> 2];//右移
+            cs[w++] = code[(b1 << 4) & MASK6 | (b2 >> 4)];//左移 右移
+            cs[w++] = code[(b2 << 2) & MASK6 | (b3 >> 6)];//左移 右移
+            cs[w++] = code[b3 & MASK6];//
         }
 
         if (rem == 1) {
@@ -748,7 +752,7 @@ public class Bytes {
      *
      * @param bytes source.
      * @return compressed byte array.
-     * @throws IOException.
+//     * @throws IOException.
      */
     public static byte[] zip(byte[] bytes) throws IOException {
         UnsafeByteArrayOutputStream bos = new UnsafeByteArrayOutputStream();
