@@ -11,6 +11,9 @@ public class ByteBufferBackedChannelBufferTest extends AbstractChannelBufferTest
 
     @Override
     protected ChannelBuffer newBuffer(int capacity) {
+        //position limit capacity
+        //写模式
+        // position = 0 limit = capacity
         buffer = new ByteBufferBackedChannelBuffer(ByteBuffer.allocate(capacity));
         return buffer;
     }
