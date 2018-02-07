@@ -72,7 +72,8 @@ public final class JavaBeanSerializeUtil {
         }
     }
 
-    private static JavaBeanDescriptor createDescriptorIfAbsent(Object obj, JavaBeanAccessor accessor, IdentityHashMap<Object, JavaBeanDescriptor> cache) {
+    private static JavaBeanDescriptor createDescriptorIfAbsent(Object obj, JavaBeanAccessor accessor,
+                                                               IdentityHashMap<Object, JavaBeanDescriptor> cache) {
         if (cache.containsKey(obj)) {
             return cache.get(obj);
         } else if (obj instanceof JavaBeanDescriptor) {
@@ -85,7 +86,8 @@ public final class JavaBeanSerializeUtil {
         }
     }
 
-    private static void serializeInternal(JavaBeanDescriptor descriptor, Object obj, JavaBeanAccessor accessor, IdentityHashMap<Object, JavaBeanDescriptor> cache) {
+    private static void serializeInternal(JavaBeanDescriptor descriptor, Object obj, JavaBeanAccessor accessor,
+                                          IdentityHashMap<Object, JavaBeanDescriptor> cache) {
         if (obj == null || descriptor == null) {
             return;
         }
@@ -182,7 +184,8 @@ public final class JavaBeanSerializeUtil {
         return result;
     }
 
-    private static void deserializeInternal(Object result, JavaBeanDescriptor beanDescriptor, ClassLoader loader, IdentityHashMap<JavaBeanDescriptor, Object> cache) {
+    private static void deserializeInternal(Object result, JavaBeanDescriptor beanDescriptor, ClassLoader loader,
+                                            IdentityHashMap<JavaBeanDescriptor, Object> cache) {
         if (beanDescriptor.isEnumType() || beanDescriptor.isClassType() || beanDescriptor.isPrimitiveType()) {
             return;
         }
@@ -342,7 +345,8 @@ public final class JavaBeanSerializeUtil {
         }
     }
 
-    private static Object instantiateForDeserialize(JavaBeanDescriptor beanDescriptor, ClassLoader loader, IdentityHashMap<JavaBeanDescriptor, Object> cache) {
+    private static Object instantiateForDeserialize(JavaBeanDescriptor beanDescriptor, ClassLoader loader,
+                                                    IdentityHashMap<JavaBeanDescriptor, Object> cache) {
         if (cache.containsKey(beanDescriptor)) {
             return cache.get(beanDescriptor);
         }
